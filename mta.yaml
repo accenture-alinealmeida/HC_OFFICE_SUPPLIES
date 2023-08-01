@@ -1,0 +1,51 @@
+_schema-version: '3.1'
+ID: HC_OFFICE_SUPPLIES
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npx cds build --production
+modules:
+  #----------------------------- SERVER MODULE ------------------------------------
+  - name: HC_OFFICE_SUPPLIES-srv
+  #--------------------------------------------------------------------------------
+    type: nodejs
+    path: gen/srv
+    requires:
+      # Resources extracted form CAP configuration
+      - name: HC_OFFICE_SUPPLIES-db
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+  
+  #----------------------------- SIDECAR MODULE ----------------------------------
+  - name: HC_OFFICE_SUPPLIES-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: HC_OFFICE_SUPPLIES-db
+
+resources:
+  # services extracted from CAP configuration
+  # 'service-plan' can be configured via 'cds.requires.<name>'.vcap.plan
+# --------------------------------------------------------------------------------
+  - name: HC_OFFICE_SUPPLIES-db
+# --------------------------------------------------------------------------------
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+    properties:
+      hdi-service-name: ${service-name}
