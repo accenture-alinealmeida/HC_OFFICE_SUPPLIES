@@ -35,6 +35,7 @@ modules:
     parameters:
       buildpack: nodejs_buildpack
     requires:
+      # 'hana' and 'xsuaa' resources extracted from CAP configuration
       - name: HC_OFFICE_SUPPLIES-db
 
 resources:
